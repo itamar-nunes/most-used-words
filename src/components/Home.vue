@@ -5,7 +5,7 @@
         label="Selecione as legendas"
         prepend-icon="mdi-message-text"
         append-outer-icon="mdi-send"
-        multiple 
+        multiple
         chips
         v-model="files"
         @click:append-outer="processSubtitles"
@@ -19,6 +19,7 @@
 
 <script>
 import Pill from "./Pill";
+import { ipcRenderer } from "electron";
 
 export default {
   name: "Home",
@@ -28,16 +29,20 @@ export default {
   data: function() {
     return {
       files: [],
-      groupedWords: [
-        { name: "i", amount: 1234 },
-        { name: "you", amount: 900 },
-        { name: "he", amount: 853 }
-      ]
+      groupedWords: []
     };
   },
   methods: {
     processSubtitles() {
-      console.log(this.files);
+      const paths = this.files.map(file => {
+        return file.path;
+      });
+
+      ipcRenderer.send("processSubtitles", paths);
+
+      ipcRenderer.on("processSubtitles", (event, words) => {
+        this.groupedWords = words;
+      });
     }
   }
 };
